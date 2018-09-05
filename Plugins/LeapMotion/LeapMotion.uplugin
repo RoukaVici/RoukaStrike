@@ -21,8 +21,7 @@
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Win64",
-				"Win32",
-				"Mac"
+				"Win32"
 			]
 		},
 		{
@@ -31,8 +30,7 @@
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [
 				"Win64",
-				"Win32",
-				"Mac"
+				"Win32"
 			]
 		},
 		{

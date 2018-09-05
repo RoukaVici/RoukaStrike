@@ -1,6 +1,8 @@
 LeapUnreal
 ====================
 
+[![GitHub release](https://img.shields.io/github/release/leapmotion/leapunreal.svg)](https://github.com/leapmotion/leapunreal/releases)
+
 The official [Leap Motion](http://www.leapmotion.com) plugin for the Unreal Engine 4. 
 
 You can use convenience blueprints to just select and play or use a custom approach via blueprints or C++. See relevant sections for details
@@ -326,7 +328,7 @@ Below is a link to an example video for packaging for windows. The user here had
 
 
 
-### Android (you will need access to a private runtime)
+### Android (Public peripheral not supported, you will need access to a private runtime)
 Ensure you've completed https://docs.unrealengine.com/latest/INT/Platforms/Android/GettingStarted/1/index.html at least once per engine release first, then package for you build type
 
 #### Cardboard

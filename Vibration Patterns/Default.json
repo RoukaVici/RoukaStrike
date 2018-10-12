@@ -1,0 +1,46 @@
+{
+	"name": "Default",
+	"delay": 0.5,
+	"fingers": [
+		{
+			"id": 0,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 1,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 2,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 3,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 4,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 5,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 6,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 7,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 8,
+			"pattern": [ 80, 90 ]
+		},
+		{
+			"id": 9,
+			"pattern": [ 80, 90 ]
+		}
+	]
+}

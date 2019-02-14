@@ -74,7 +74,7 @@ private:
 	// An aray of int representing the iterations of the pattern
     //TArray<int> steps;
 
-	 ///< An Integer that indicates the current step index
+	 // An Integer that indicates the current step index
 	int currentStepIndex = 0;
 
 	// A Float used to define whether the delay from the pattern has elapsed. 

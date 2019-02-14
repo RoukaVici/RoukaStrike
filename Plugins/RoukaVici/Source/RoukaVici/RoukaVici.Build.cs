@@ -59,7 +59,7 @@ public class RoukaVici : ModuleRules
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
             PublicAdditionalLibraries.Add(Path.Combine(libFolder, platformName, "libroukavici.dylib"));
-            PublicAdditionalLibraries.Add(Path.Combine(libFolder, platformName, "libbluetoothserialport.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(libFolder, platformName, "libbluetoothserialport.dylib"));
         }
     }
 

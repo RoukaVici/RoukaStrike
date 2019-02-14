@@ -7,10 +7,10 @@
 void CallbackDebug(const char *str)
 {
 	FString msg(str);
-	UE_LOG(LogTemp, Warning, TEXT("RVLog: %s"), *msg);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *msg);
 }
 
-bool ULibRoukaVici::loadLib()
+bool ULibRoukaVici::LoadLib()
 {
 	SetLogMode(2);
 	RegisterDebugCallback(&CallbackDebug);
@@ -18,41 +18,55 @@ bool ULibRoukaVici::loadLib()
 	if (InitRVici())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error while loading Lib RoukaVici"));
-		return false;
+		return (false);
 	}
-	ChangeDeviceManager(2);
-	FindDevice();
 
 	UE_LOG(LogTemp, Warning, TEXT("Lib RoukaVici was successfuly loaded"));
-	return true;
+	return (true);
 }
 
-int ULibRoukaVici::initLib()
+int ULibRoukaVici::InitLib()
 {
 	return (InitRVici());
 }
 
-void ULibRoukaVici::callStopLib()
+void ULibRoukaVici::CallStopLib()
 {
 	StopRVici();
 }
 
-int ULibRoukaVici::callVibrate(int motor, int intensity)
+int ULibRoukaVici::CallVibrate(int motor, int intensity)
 {
-	return Vibrate(motor, intensity);
+	return (Vibrate(motor, intensity));
 }
 
-void ULibRoukaVici::callSetLogMode(const int mode)
+void ULibRoukaVici::CallSetLogMode(const int mode)
 {
 	SetLogMode(mode);
 }
 
-int ULibRoukaVici::callChangeDeviceManager(const int dm)
+int ULibRoukaVici::CallChangeDeviceManager(const int dm)
 {
 	return (ChangeDeviceManager(dm));
 }
 
-int ULibRoukaVici::callFindDevice()
+int ULibRoukaVici::CallFindDevice()
 {
 	return (FindDevice());
+}
+
+int ULibRoukaVici::CallStatus()
+{
+	return (Status());
+}
+
+int ULibRoukaVici::TryConnectingWithBluetooth()
+{
+	ChangeDeviceManager(2);
+	return (FindDevice());
+}
+
+void ULibRoukaVici::CallMultithreadedFunction(UObject *object)
+{
+	(new FAutoDeleteAsyncTask<MultiThreadedTask>(object))->StartBackgroundTask();
 }

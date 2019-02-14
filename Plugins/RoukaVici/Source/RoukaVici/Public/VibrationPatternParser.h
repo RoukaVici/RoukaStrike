@@ -8,7 +8,7 @@
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "VibrationPatternParser.generated.h"
 
-class UVibrationSelectionWidget;
+class RoukaViciWidget;
 class URoukaViciManager;
 
 /**
@@ -20,7 +20,7 @@ struct FmMotor
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	int id; ///< ID of the motor
 
 	UPROPERTY(BluePrintReadWrite, VisibleAnywhere)
@@ -30,7 +30,7 @@ struct FmMotor
 USTRUCT(BlueprintType)
 /**
  * @brief This struct stores motors patterns
- * with a name and a delay
+ * with a name and a duration
  * 
  */
 struct FmPattern
@@ -43,10 +43,10 @@ struct FmPattern
 	FString name; ///< Name of the pattern
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	float delay; ///< delay between each intensities
+	float duration; ///< duration of each intensity
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	TArray<FmMotor> fingers; ///< List of fingers for the pattern
+	TArray<FmMotor> motors; ///< List of motors for the pattern
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -89,5 +89,12 @@ private:
 	 * Called internaly at the instantiation of the object
 	 * 
 	 */
-	void parseData();
+	void ParseData();
+
+	/**
+	 * @brief Check if the Vibration Patterns folder exists.
+	 * Create it with a default profile if it doesn't exist.
+	 *
+	 */
+	void CheckPatternsFolder(const FString &folderPath);
 };

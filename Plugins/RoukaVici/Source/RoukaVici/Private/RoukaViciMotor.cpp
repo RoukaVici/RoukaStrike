@@ -23,21 +23,23 @@ void ARoukaViciMotor::Tick(float DeltaTime)
 
 	mTime += DeltaTime;
 	
-	// Verify that the delay elapsed
+	// Verify that the duration elapsed
 	if (isVibrating && id >= 0 && manager != NULL && manager->patterns.Num() > 0
-		&& mTime >= manager->patterns[manager->patternID].delay)
+		&& mTime >= manager->patterns[manager->patternID].duration)
 	{
+		if (currentStepIndex >= manager->patterns[manager->patternID].motors[id].pattern.Num())
+			currentStepIndex = 0;
 		// Find the intensity of the next vibration
-		int currentStepIntensity = manager->patterns[manager->patternID].fingers[id].pattern[currentStepIndex];
+		int currentStepIntensity = manager->patterns[manager->patternID].motors[id].pattern[currentStepIndex];
 
 		// Some debugging information
 		UE_LOG(LogTemp, Warning, TEXT("Vibrating motor ID %d for an intensity of %d"), id, (255 * currentStepIntensity) / 100);
         
 		// Vibrate at a specific calculated intensity
-		ULibRoukaVici::callVibrate(id, (255 * currentStepIntensity) / 100);
+		ULibRoukaVici::CallVibrate(id, (255 * currentStepIntensity) / 100);
 
 		// Iterate in the steps provided in the patterns
-		currentStepIndex = (currentStepIndex == manager->patterns[manager->patternID].fingers[id].pattern.Num() - 1 ? 0 : ++currentStepIndex);
+		currentStepIndex = (currentStepIndex == manager->patterns[manager->patternID].motors[id].pattern.Num() - 1 ? 0 : ++currentStepIndex);
 
 		// Reset the timer and wait for a new iteration to begin
 		mTime = 0;
@@ -53,7 +55,7 @@ void ARoukaViciMotor::sendVibrationCommand(int fingerId)
 
 void ARoukaViciMotor::stopVibrationCommand(int fingerId)
 {
-	ULibRoukaVici::callVibrate(id, 0);
+	ULibRoukaVici::CallVibrate(id, 0);
 	UE_LOG(LogTemp, Warning, TEXT("Stopped Vibrating for motor with id: %d"), fingerId);
 	isVibrating = false;
 	id = fingerId;

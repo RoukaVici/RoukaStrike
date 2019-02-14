@@ -4,15 +4,15 @@
 #include "Json.h"
 #include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
 
-#include "VibrationSelectionWidget.h"
+#include "RoukaViciWidget.h"
 #include "RoukaViciManager.h"
 
 FmPattern::FmPattern()
 {
 	name = "";
-	delay = 0;
+	duration = 0;
 	FmMotor elem;
-	fingers.Init(elem, (int)EMotorNumber::MN_LastMotor);
+	motors.Init(elem, (int)EMotorNumber::MN_LastMotor);
 }
 
 // Sets default values
@@ -39,24 +39,50 @@ void UVibrationPatternParser::BeginPlay()
 	// Doesn't parse if the manager already has patterns, meaning that pasring has already been made.
 	if (URoukaViciManager::instance->patterns.Num() == 0)
 	{
-        parseData();
+        ParseData();
 		URoukaViciManager::instance->patterns = patterns;
 	}
 	else
 		patterns = URoukaViciManager::instance->patterns;
 
-	// Instantiate the Widget for the pattern editor, and display it.
-	URoukaViciManager::patternEditor = CreateWidget<UVibrationSelectionWidget>(GetOwner()->GetGameInstance(), widgetTemplate);
-	if (URoukaViciManager::patternEditor)
+	// Instantiate the UI Widget.
+	URoukaViciManager::UI = CreateWidget<URoukaViciWidget>(GetOwner()->GetGameInstance(), widgetTemplate);
+	if (URoukaViciManager::UI)
 	{
-		URoukaViciManager::patternEditor->AddToViewport();
-		URoukaViciManager::patternEditor->patterns = patterns;
-		URoukaViciManager::patternEditor->manager = URoukaViciManager::instance;
-		URoukaViciManager::patternEditor->createUIDelegate.Broadcast();
+		URoukaViciManager::UI->AddToViewport();
+		URoukaViciManager::UI->patterns = patterns;
+		URoukaViciManager::UI->manager = URoukaViciManager::instance;
+		URoukaViciManager::UI->createUIDelegate.Broadcast();
 	}
 }
 
-void UVibrationPatternParser::parseData()
+void UVibrationPatternParser::CheckPatternsFolder(const FString &folderPath)
+{
+	if (!FPaths::FileExists(folderPath + "Default.json"))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Vibration Patterns not found, creating default profile"));
+
+		// Instantiate a default pattern
+		FmPattern elemP;
+		elemP.name = "Default";
+		elemP.duration = 0.5f;
+		for (int i = 0; i < 10; ++i)
+		{
+			FmMotor elemF;
+			elemF.id = i;
+			elemF.pattern.Add(80);
+			elemF.pattern.Add(90);
+			elemP.motors[i] = elemF;
+		}
+
+		// Write a Json file in the folder.
+		FString OutputString;
+		FJsonObjectConverter::UStructToJsonObjectString(elemP, OutputString, 0, 0, 0, NULL, true);
+		FFileHelper::SaveStringToFile(OutputString, *(folderPath + "Default.json"));
+	}
+}
+
+void UVibrationPatternParser::ParseData()
 {
 	// Determine if we are currently in the editor or not.
 	FString folderPath;
@@ -69,38 +95,19 @@ void UVibrationPatternParser::parseData()
 
 	// If we are in the editor, complete the path. Otherwise this is the path.
 	folderPath += "/Vibration Patterns/";
-
-	// If the folder doesn't exist, create it with a default pattern
-	if (!FPaths::FileExists(folderPath + "Default.json"))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Vibration Patterns not found, creating default profile"));
-
-		FmPattern elemP;
-		elemP.name = "Default";
-		elemP.delay = 0.5f;
-		for (int i = 0; i < 10; ++i)
-		{
-			FmMotor elemF;
-			elemF.id = i;
-			elemF.pattern.Add(80);
-			elemF.pattern.Add(90);
-			elemP.fingers[i] = elemF;
-
-		}
-
-		// Write a Json file in the folder.
-		FString OutputString;
-		FJsonObjectConverter::UStructToJsonObjectString(elemP, OutputString, 0, 0, 0, NULL, true);
-		FFileHelper::SaveStringToFile(OutputString, *(folderPath + "Default.json"));
-	}
+	CheckPatternsFolder(folderPath);
 
 	// Gets all the Json files in the folder
 	TArray<FString> Files;
 	IFileManager& FileManager = IFileManager::Get();
 	FileManager.FindFiles(Files, *(folderPath + "*.json"), true, false);
 
+	// Limit the amount of patterns to parse
+	int patternNbLimit = 10;
 	for (FString path: Files)
 	{
+		if (patternNbLimit-- < 0)
+			break;
 		// Create the path for each Json file in the folder.
 		FString data;
 		FFileHelper::LoadFileToString(data, *(folderPath + path));
@@ -112,21 +119,21 @@ void UVibrationPatternParser::parseData()
 		if (FJsonSerializer::Deserialize(reader, parsedObject))
 		{
 			FString name = parsedObject->GetStringField(TEXT("name"));
-			float delay = parsedObject->GetNumberField(TEXT("delay"));
-			TArray<TSharedPtr<FJsonValue> > fingers = parsedObject->GetArrayField(TEXT("fingers"));
+			float duration = parsedObject->GetNumberField(TEXT("duration"));
+			TArray<TSharedPtr<FJsonValue> > motors = parsedObject->GetArrayField(TEXT("motors"));
 
-			// Check if the name, delay and motors count are valid. Skip the file if not valid.
-			if (name.Len() == 0 || delay <= 0 || fingers.Num() != (int)EMotorNumber::MN_LastMotor)
+			// Check if the name, duration and motors count are valid. Skip the file if not valid.
+			if (name.Len() == 0 || duration <= 0 || motors.Num() != (int)EMotorNumber::MN_LastMotor)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Your config file must have a valid name, a positive delay and 10 fingers"));
+				UE_LOG(LogTemp, Warning, TEXT("Your config file must have a valid name, a positive duration and 10 motors"));
 				continue;
 			}
 
 			//  Add an element to the pattern array and fill it.
 			int i = 0;
 			elemP.name = name;
-			elemP.delay = delay;
-			for (TSharedPtr<FJsonValue> f : fingers)
+			elemP.duration = duration;
+			for (TSharedPtr<FJsonValue> f : motors)
 			{
 				FmMotor elemF;
 				const TSharedPtr<FJsonObject> *fo;
@@ -160,7 +167,7 @@ void UVibrationPatternParser::parseData()
 					if (fonb->TryGetNumber(out))
 						elemF.pattern.Add(out);
 				}
-				elemP.fingers[i++] = elemF;
+				elemP.motors[i++] = elemF;
 			}
 		}
 		// If the deserialization doesn't succeed, skip the file

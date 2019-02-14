@@ -16,7 +16,7 @@
 	"Modules": [
 		{
 			"Name": "RoukaVici",
-			"Type": "Developer",
+			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
 	]
